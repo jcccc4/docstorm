@@ -1,22 +1,44 @@
 import { Button } from "@/components/ui/button";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $getSelection, $isRangeSelection } from "lexical";
-import { JSX, MouseEvent } from "react";
-import { $createHeadingNode } from "@lexical/rich-text";
-import { $setBlocksType } from "@lexical/selection";
 import {
-  INSERT_ORDERED_LIST_COMMAND,
-  INSERT_UNORDERED_LIST_COMMAND,
-} from "@lexical/list";
-import { INSERT_BANNER_COMMAND } from "./BannerPlugin";
+  $getSelection,
+  $isRangeSelection,
+  FORMAT_ELEMENT_COMMAND,
+  FORMAT_TEXT_COMMAND,
+  REDO_COMMAND,
+  UNDO_COMMAND,
+} from "lexical";
+import { JSX } from "react";
+import { $createHeadingNode, HeadingTagType } from "@lexical/rich-text";
+import { $setBlocksType } from "@lexical/selection";
 
-type HeadingTag = "h1" | "h2" | "h3";
-type listTag = "ol" | "ul";
+import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Heading1,
+  Heading2,
+  Heading3,
+  Italic,
+  Redo2,
+  Strikethrough,
+  Underline,
+  Undo2,
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
+const Headings = Object.freeze({
+  H1: "h1",
+  H2: "h2",
+  H3: "h3",
+});
+export type HeadingKey = keyof typeof Headings;
 function HeadingToolbarPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const headingTags: HeadingTag[] = ["h1", "h2", "h3"];
-  const onClick = (tag: HeadingTag): void => {
+
+  const onClick = (tag: HeadingTagType): void => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
@@ -26,53 +48,130 @@ function HeadingToolbarPlugin(): JSX.Element {
   };
   return (
     <div className="flex gap-2">
-      {headingTags.map((tag) => (
-        <Button onClick={() => onClick(tag)} key={tag}>
-          {tag.toUpperCase()}
-        </Button>
-      ))}
+      <Button
+        variant="ghost"
+        onClick={() => onClick(Headings.H1)}
+        key={Headings.H1}
+      >
+        <Heading1 />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => onClick(Headings.H2)}
+        key={Headings.H2}
+      >
+        <Heading2 />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => onClick(Headings.H3)}
+        key={Headings.H3}
+      >
+        <Heading3 />
+      </Button>
     </div>
   );
 }
 
-function ListToolbarPlugin() {
+function HistoryToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
-  const listTags: listTag[] = ["ol", "ul"];
-
-  const onClick = (tag: listTag): void => {
-    if (tag === "ol") {
-      editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined);
-      return;
-    }
-    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
-  };
   return (
     <div className="flex gap-2">
-      {listTags.map((tag) => (
-        <Button onClick={() => onClick(tag)} key={tag}>
-          {tag.toUpperCase()}
-        </Button>
-      ))}
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
+      >
+        <Undo2 />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
+      >
+        <Redo2 />
+      </Button>
     </div>
   );
 }
 
-function BannerToolbarPlugin() {
+function FormatElementToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
 
-  const onClick = (e: MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    editor.dispatchCommand(INSERT_BANNER_COMMAND, undefined);
-  };
-  return <Button onClick={onClick}>Banner</Button>;
+  return (
+    <div className="flex gap-2">
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left")}
+      >
+        <AlignLeft />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center")}
+      >
+        <AlignCenter />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right")}
+      >
+        <AlignRight />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() =>
+          editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify")
+        }
+      >
+        <AlignJustify />
+      </Button>
+    </div>
+  );
+}
+
+function FormatTextToolbarPlugin() {
+  const [editor] = useLexicalComposerContext();
+  return (
+    <div className="flex gap-2">
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
+      >
+        <Bold />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
+      >
+        <Italic />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
+      >
+        <Underline />
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() =>
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
+        }
+      >
+        <Strikethrough />
+      </Button>
+    </div>
+  );
 }
 
 export function ToolbarPlugin(): JSX.Element {
   return (
-    <div className="flex gap-4">
+    <div className="flex justify-left items-center gap-4 h-11 p-2  bg-primary-foreground rounded-sm">
+      <HistoryToolbarPlugin />
+      <Separator orientation="vertical"/>
       <HeadingToolbarPlugin />
-      <ListToolbarPlugin />
-      <BannerToolbarPlugin />
+      <Separator orientation="vertical" />
+      <FormatTextToolbarPlugin />
+      <Separator orientation="vertical" />
+      <FormatElementToolbarPlugin />
     </div>
   );
 }

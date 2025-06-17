@@ -44,19 +44,19 @@ export default function Home() {
   };
 
   return (
-    <div className="relative flex h-screen w-screen flex-col items-center pt-16">
-      <div className="relative h-[500px] w-full max-w-[1120px] px-4">
-        <LexicalComposer initialConfig={initialConfig}>
-          <ToolbarPlugin />
-          <ListPlugin />
-          <HistoryPlugin />
+    <div className="relative flex h-screen w-screen  flex-col items-center pt-16 x-10">
+      <LexicalComposer initialConfig={initialConfig}>
+        <ToolbarPlugin />
+        <ListPlugin />
+        <HistoryPlugin />
+        <div className="relative w-full max-w-[1120px] ">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="relative mt-2 h-full w-full border border-solid border-white px-2 py-2"
+                className="relative min-h-[150px] resize-none bg-white p-[15px_10px] text-[15px] caret-[#444] outline-none [tab-size:1]"
                 aria-placeholder={"Enter some text..."}
                 placeholder={
-                  <div className="absolute top-15 left-6">
+                  <div className="pointer-events-none absolute top-[15px] left-[10px] inline-block overflow-hidden text-[15px] text-ellipsis text-[#999] select-none">
                     Enter some text...
                   </div>
                 }
@@ -64,10 +64,8 @@ export default function Home() {
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
-
-          <HistoryPlugin />
-        </LexicalComposer>
-      </div>
+        </div>
+      </LexicalComposer>
     </div>
   );
 }

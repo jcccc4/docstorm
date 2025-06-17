@@ -3,14 +3,20 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  CAN_REDO_COMMAND,
+  CAN_UNDO_COMMAND,
+  COMMAND_PRIORITY_LOW,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
+  LexicalEditor,
   REDO_COMMAND,
+  SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
 } from "lexical";
-import { JSX } from "react";
+import { JSX, useCallback, useEffect, useState } from "react";
 import { $createHeadingNode, HeadingTagType } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
+import { mergeRegister } from "@lexical/utils";
 
 import {
   AlignCenter,
@@ -35,9 +41,11 @@ const Headings = Object.freeze({
   H3: "h3",
 });
 export type HeadingKey = keyof typeof Headings;
-function HeadingToolbarPlugin(): JSX.Element {
-  const [editor] = useLexicalComposerContext();
-
+function HeadingToolbarPlugin({
+  editor,
+}: {
+  editor: LexicalEditor;
+}): JSX.Element {
   const onClick = (tag: HeadingTagType): void => {
     editor.update(() => {
       const selection = $getSelection();
@@ -47,7 +55,7 @@ function HeadingToolbarPlugin(): JSX.Element {
     });
   };
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <Button
         variant="ghost"
         onClick={() => onClick(Headings.H1)}
@@ -73,17 +81,26 @@ function HeadingToolbarPlugin(): JSX.Element {
   );
 }
 
-function HistoryToolbarPlugin() {
-  const [editor] = useLexicalComposerContext();
+function HistoryToolbarPlugin({
+  editor,
+  canUndo,
+  canRedo,
+}: {
+  editor: LexicalEditor;
+  canUndo: boolean;
+  canRedo: boolean;
+}) {
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <Button
+        className={canUndo ? "" : "text-border pointer-events-none"}
         variant="ghost"
         onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
       >
         <Undo2 />
       </Button>
       <Button
+        className={canRedo ? "" : "text-border pointer-events-none"}
         variant="ghost"
         onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
       >
@@ -93,11 +110,9 @@ function HistoryToolbarPlugin() {
   );
 }
 
-function FormatElementToolbarPlugin() {
-  const [editor] = useLexicalComposerContext();
-
+function FormatElementToolbarPlugin({ editor }: { editor: LexicalEditor }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <Button
         variant="ghost"
         onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left")}
@@ -128,30 +143,41 @@ function FormatElementToolbarPlugin() {
   );
 }
 
-function FormatTextToolbarPlugin() {
-  const [editor] = useLexicalComposerContext();
+function FormatTextToolbarPlugin({
+  editor,
+  isBold,
+  isItalic,
+  isUnderline,
+  isStrikethrough,
+}: {
+  editor: LexicalEditor;
+  isBold: boolean;
+  isItalic: boolean;
+  isUnderline: boolean;
+  isStrikethrough: boolean;
+}) {
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <Button
-        variant="ghost"
+        variant={isBold ? "default" : "ghost"}
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
       >
         <Bold />
       </Button>
       <Button
-        variant="ghost"
+        variant={isItalic ? "default" : "ghost"}
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
       >
         <Italic />
       </Button>
       <Button
-        variant="ghost"
+        variant={isUnderline ? "default" : "ghost"}
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
       >
         <Underline />
       </Button>
       <Button
-        variant="ghost"
+        variant={isStrikethrough ? "default" : "ghost"}
         onClick={() =>
           editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough")
         }
@@ -163,15 +189,77 @@ function FormatTextToolbarPlugin() {
 }
 
 export function ToolbarPlugin(): JSX.Element {
+  const [editor] = useLexicalComposerContext();
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const $updateToolbar = useCallback(() => {
+    const selection = $getSelection();
+    if ($isRangeSelection(selection)) {
+      // Update text format
+      setIsBold(selection.hasFormat("bold"));
+      setIsItalic(selection.hasFormat("italic"));
+      setIsUnderline(selection.hasFormat("underline"));
+      setIsStrikethrough(selection.hasFormat("strikethrough"));
+    }
+  }, []);
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerUpdateListener(({ editorState }) => {
+        editorState.read(() => {
+          $updateToolbar();
+        });
+      }),
+      editor.registerCommand(
+        SELECTION_CHANGE_COMMAND,
+        (_payload, _newEditor) => {
+          $updateToolbar();
+          return false;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        CAN_UNDO_COMMAND,
+        (payload) => {
+          setCanUndo(payload);
+          return false;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        CAN_REDO_COMMAND,
+        (payload) => {
+          setCanRedo(payload);
+          return false;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+  }, [editor, $updateToolbar]);
+
   return (
-    <div className="flex justify-left items-center gap-4 h-11 p-2  bg-primary-foreground rounded-sm">
-      <HistoryToolbarPlugin />
-      <Separator orientation="vertical"/>
-      <HeadingToolbarPlugin />
+    <div className="justify-left border-b-border flex h-11 w-full max-w-[1120px] items-center gap-4 rounded-t-sm border bg-white p-2">
+      <HistoryToolbarPlugin
+        editor={editor}
+        canUndo={canUndo}
+        canRedo={canRedo}
+      />
+      <Separator orientation="vertical" className="w-2" />
+      <HeadingToolbarPlugin editor={editor} />
       <Separator orientation="vertical" />
-      <FormatTextToolbarPlugin />
+      <FormatTextToolbarPlugin
+        editor={editor}
+        isBold={isBold}
+        isItalic={isItalic}
+        isUnderline={isUnderline}
+        isStrikethrough={isStrikethrough}
+      />
       <Separator orientation="vertical" />
-      <FormatElementToolbarPlugin />
+      <FormatElementToolbarPlugin editor={editor} />
     </div>
   );
 }

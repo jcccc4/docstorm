@@ -10,6 +10,11 @@
   },
   "dependencies": {
     "@lexical/react": "^0.31.2",
+    "@liveblocks/client": "^2.24.3",
+    "@liveblocks/node": "^2.24.3",
+    "@liveblocks/react": "^2.24.3",
+    "@liveblocks/react-lexical": "^2.24.3",
+    "@liveblocks/react-ui": "^2.24.3",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",

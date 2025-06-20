@@ -22,6 +22,7 @@ export default function Room() {
            const searchParams = new URLSearchParams(
              userIds.map((userId) => ["userIds", userId]),
            );
+           console
            const response = await fetch(`/users?${searchParams}`);
    
            if (!response.ok) {

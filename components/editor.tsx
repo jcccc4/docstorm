@@ -60,10 +60,10 @@ export default function Editor() {
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
-                      className="relative min-h-[150px] resize-none bg-white p-[15px_10px] text-[15px] caret-[#444] outline-none [tab-size:1]"
+                      className="relative min-h-[150px] resize-none bg-white p-4 text-[15px] caret-[#444] outline-none [tab-size:1]"
                       aria-placeholder={"Enter some text..."}
                       placeholder={
-                        <div className="pointer-events-none absolute top-[15px] left-[10px] inline-block overflow-hidden text-[15px] text-ellipsis text-[#999] select-none">
+                        <div className="pointer-events-none absolute top-[16px] left-[16px] inline-block overflow-hidden text-[15px] text-ellipsis text-[#999] select-none">
                           Enter some text...
                         </div>
                       }

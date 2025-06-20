@@ -48,14 +48,6 @@
   height: 100%;
 }
 
-[data-lexical-editor] {
-  padding: 2px 12px;
-  outline: none;
-}
-
-[data-lexical-editor] p {
-  margin: 0.8em 0;
-}
 
 /* For mobile */
 .floating-threads {

@@ -1,6 +1,6 @@
+import { createClient } from "@/lib/server";
 import { Liveblocks } from "@liveblocks/node";
 import { NextRequest } from "next/server";
-import { getRandomUser } from "@/database";
 
 /**
  * Authenticating your Liveblocks application
@@ -13,13 +13,20 @@ const liveblocks = new Liveblocks({
 
 export async function POST(request: NextRequest) {
   // Get the current user's unique id and info from your database
-  console.log(request);
-  const user = getRandomUser();
-  console.log(user);  
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log(user);
   // Create a session for the current user
   // userInfo is made available in Liveblocks presence hooks, e.g. useOthers
-  const session = liveblocks.prepareSession(`${user.id}`, {
-    userInfo: user.info,
+  const session = liveblocks.prepareSession(`${user?.user_metadata.email}`, {
+    userInfo: {
+      name: user?.user_metadata.name,
+      color: "#D583F0",
+      avatar: user?.user_metadata.avatar_url,
+    },
   });
 
   // Use a naming pattern to allow access to rooms with a wildcard

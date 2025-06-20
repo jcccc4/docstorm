@@ -1,4 +1,5 @@
-import { getUser } from "@/database";
+import { getUser } from "@/chdatabase";
+import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -9,8 +10,26 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Missing or invalid userIds", { status: 400 });
   }
 
+  const supabase = await createClient();
+
+  const { data: usernames, error } = await supabase
+    .from("profiles")
+    .select("name, avatar_url")
+    .in("name", userIds);
+  console.log("wtf", usernames);
+  if (error) {
+    console.error("Supabase query error:", error);
+    return new NextResponse(error.message, { status: 500 });
+  }
+
+  console.log("Result:", usernames);
   return NextResponse.json(
-    userIds.map((userId) => getUser(userId)?.info || null),
-    { status: 200 }
+    usernames.map(({ name, avatar_url }) => {
+      return {
+        name,
+        avatar: avatar_url,
+      };
+    }),
+    { status: 200 },
   );
 }

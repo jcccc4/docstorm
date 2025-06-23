@@ -9,6 +9,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { ToolbarPlugin } from "@/app/plugin/ToolbarPlugin";
 
+
 import {
   liveblocksConfig,
   LiveblocksPlugin,

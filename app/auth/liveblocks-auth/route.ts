@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/server";
 import { Liveblocks } from "@liveblocks/node";
-import { NextRequest } from "next/server";
 
 /**
  * Authenticating your Liveblocks application
@@ -11,14 +10,13 @@ const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   // Get the current user's unique id and info from your database
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  console.log(user);
   // Create a session for the current user
   // userInfo is made available in Liveblocks presence hooks, e.g. useOthers
   const session = liveblocks.prepareSession(`${user?.user_metadata.email}`, {
@@ -34,5 +32,6 @@ export async function POST(request: NextRequest) {
 
   // Authorize the user and return the result
   const { body, status } = await session.authorize();
+
   return new Response(body, { status });
 }

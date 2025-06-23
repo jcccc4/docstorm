@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUsers } from "@/chdatabase";
+
 import { createClient } from "@/utils/supabase/server";
 
 /**
@@ -23,6 +23,5 @@ export async function GET(request: NextRequest) {
 
   // Extract just the names from the array of objects
   const filteredUserNames = data?.map((user) => user.name) || [];
-
   return NextResponse.json(filteredUserNames);
 }

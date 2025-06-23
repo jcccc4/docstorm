@@ -1,4 +1,3 @@
-import { getUser } from "@/chdatabase";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,13 +15,12 @@ export async function GET(request: NextRequest) {
     .from("profiles")
     .select("name, avatar_url")
     .in("name", userIds);
-  console.log("wtf", usernames);
+
   if (error) {
     console.error("Supabase query error:", error);
     return new NextResponse(error.message, { status: 500 });
   }
 
-  console.log("Result:", usernames);
   return NextResponse.json(
     usernames.map(({ name, avatar_url }) => {
       return {

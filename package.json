@@ -9,12 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lexical/react": "^0.31.2",
+    "@lexical/react": "^0.24.0",
     "@liveblocks/client": "^2.24.3",
     "@liveblocks/node": "^2.24.3",
     "@liveblocks/react": "^2.24.3",
     "@liveblocks/react-lexical": "^2.24.3",
     "@liveblocks/react-ui": "^2.24.3",
+    "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
@@ -23,7 +24,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "docstorm": "file:",
-    "lexical": "^0.31.2",
+    "lexical": "^0.24.0",
     "lucide-react": "^0.511.0",
     "next": "15.3.3",
     "react": "^19.0.0",

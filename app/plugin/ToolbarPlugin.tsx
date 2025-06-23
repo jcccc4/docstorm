@@ -216,7 +216,7 @@ export function ToolbarPlugin(): JSX.Element {
       }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_payload, _newEditor) => {
+        () => {
           $updateToolbar();
           return false;
         },
